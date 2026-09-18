@@ -1,129 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ROCK CARD DUEL - V4 MAZO INFINITO</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROCK CARD DUEL V5 - TODO FIX</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial}
-header{background:#000;border-bottom:4px solid #ffcc00;padding:12px;text-align:center;position:sticky;top:0;z-index:99}
-h1{margin:0;color:#ffcc00}
-#bar{background:#1a1a1a;padding:10px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
-#bar audio{width:320px}
-.card{width:138px;background:#1e1e1e;border:2px solid #444;border-radius:10px;margin:7px;display:inline-block;overflow:hidden;cursor:pointer;transition:.2s}
-.card:hover{transform:translateY(-4px);border-color:#ffcc00}
-.card.selected{border-color:#ffcc00;box-shadow:0 0 15px #ffcc00;transform:scale(1.05)}
-.card.new{animation:pop.5s ease}
-@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
-.card-img{width:100%;height:100px;object-fit:cover;background:#000;display:block}
-.card-band{font-size:.6rem;color:#ffcc00;padding:3px 6px;background:#000;font-weight:bold}
-.card-name{font-size:.78rem;font-weight:bold;padding:3px 6px}
-.card-role{font-size:.6rem;color:#aaa;padding:0 6px}
-.card-stats{display:flex;justify-content:space-between;padding:5px 6px;background:#000;font-size:.68rem;margin-top:3px}
+*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial, sans-serif}
+header{background:#000;border-bottom:4px solid #ffcc00;padding:10px;text-align:center;position:sticky;top:0;z-index:10}
+.card{width:150px;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);border:2px solid #444;border-radius:12px;margin:8px;display:inline-block;overflow:hidden;cursor:pointer;vertical-align:top}
+.card.selected{border-color:#ffcc00;box-shadow:0 0 18px #ffcc00;transform:scale(1.06)}
+.card-img{width:100%;height:110px;display:flex;align-items:center;justify-content:center;font-size:50px;background:#000}
+.card-band{color:#ffcc00;font-size:.65rem;font-weight:bold;background:#000;padding:4px 6px}
+.card-name{font-weight:bold;padding:4px 6px;font-size:.85rem}
+.card-stats{display:flex;justify-content:space-between;background:#000;padding:6px;font-size:.7rem}
 .card-stats b{color:#ffcc00}
-#arena{max-width:560px;margin:12px auto;background:#151515;border:2px dashed #444;border-radius:12px;padding:12px;text-align:center}
-.slots{display:flex;justify-content:space-around}
-.slot{width:155px;height:220px;background:#222;border:2px dashed #666;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-button{background:#ffcc00;color:#000;border:none;padding:10px 16px;border-radius:6px;font-weight:bold;cursor:pointer;margin:5px}
+#arena{max-width:600px;margin:14px auto;background:#111;border:2px dashed #555;border-radius:14px;padding:14px;text-align:center}
+.slot{width:160px;height:230px;background:#222;border:2px dashed #666;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin:8px;flex-direction:column;overflow:hidden}
+button{background:#ffcc00;color:#000;border:none;padding:11px 18px;border-radius:8px;font-weight:bold;cursor:pointer;margin:6px;font-size:.9rem}
+button:active{transform:scale(.95)}
 </style>
 </head>
 <body>
-<header><h1>🤘 ROCK CARD DUEL V4 ⚡</h1><div>HP: <span id="hp" style="color:#0f0">100</span> | PTS: <span id="pts">0</span> | Mazo: <span id="mazo">12</span> | <span id="now" style="color:#ffcc00">Elige carta</span></div></header>
-<div id="bar">
-<audio id="audio" controls loop autoplay></audio>
-</div>
+<header><h1>🤘 ROCK CARD DUEL V5 ⚡</h1>
+<div>HP:<span id="hp" style="color:#0f0">100</span> | PTS:<span id="pts">0</span> | <span id="now">Mazo Infinito Activo</span></div>
+<audio id="audio" controls autoplay loop style="width:320px;margin-top:8px"></audio>
+<div style="font-size:.65rem;color:#888">Si no suena, dale PLAY - Es rock real, no electrónico</div>
+</header>
 <div id="arena">
-<div class="slots">
-<div class="slot" id="pslot">TU CARTA</div>
-<div class="slot" id="eslot">RIVAL</div>
+<div><div class="slot" id="pslot">TU CARTA</div><div class="slot" id="eslot">RIVAL</div></div>
+<button onclick="pelear()">⚔️ ¡PELEAR!</button><button onclick="init()">🔄 Nueva Partida</button>
+<div id="log" style="margin-top:10px;color:#0f0;font-weight:bold"></div>
 </div>
-<button onclick="pelear()">¡PELEAR!</button><button onclick="init()">Nueva Partida</button>
-<div id="log" style="margin-top:10px;color:#ccc;font-size:.85rem"></div>
-</div>
-<div id="game" style="text-align:center;padding:10px"></div>
+<div id="game" style="text-align:center;padding:12px"></div>
 <script>
-const FALLBACK="https://via.placeholder.com/138x100/000000/ffcc00?text=ROCK";
-const music={
-"The Beatles":"https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=energetic-rock-8571.mp3",
-"Queen":"https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a650f4.mp3?filename=power-rock-12291.mp3",
-"Guns N' Roses":"https://cdn.pixabay.com/download/audio/2022/06/07/audio_b9bd4170e8.mp3?filename=rock-n-roll-123577.mp3",
-"Iron Maiden":"https://cdn.pixabay.com/download/audio/2022/10/30/audio_fa1d48d832.mp3?filename=rock-it-124191.mp3",
-"Nirvana":"https://cdn.pixabay.com/download/audio/2022/09/14/audio_619339fbc7.mp3?filename=rock-background-music-115500.mp3",
-"Black Sabbath":"https://cdn.pixabay.com/download/audio/2022/03/15/audio_0fd659c18b.mp3?filename=heavy-rock-11218.mp3"
-};
-const fullDeck=[
-{n:"John Lennon",b:"The Beatles",rol:"Voz/Guitarra",atk:88,def:75,pow:92,img:"https://upload.wikimedia.org/wikipedia/commons/8/85/John_Lennon_1969_%28cropped%29.jpg"},
-{n:"Paul McCartney",b:"The Beatles",rol:"Bajo/Voz",atk:86,def:80,pow:90,img:"https://upload.wikimedia.org/wikipedia/commons/d/d6/Paul_McCartney_in_October_2018.jpg"},
-{n:"Freddie Mercury",b:"Queen",rol:"Voz",atk:95,def:70,pow:98,img:"https://upload.wikimedia.org/wikipedia/commons/e/ef/Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg"},
-{n:"Brian May",b:"Queen",rol:"Guitarra",atk:92,def:82,pow:94,img:"https://upload.wikimedia.org/wikipedia/commons/3/33/Brian_May_2017.jpg"},
-{n:"Axl Rose",b:"Guns N' Roses",rol:"Voz",atk:90,def:65,pow:93,img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Axl_Rose_2010.jpg"},
-{n:"Slash",b:"Guns N' Roses",rol:"Guitarra",atk:94,def:78,pow:96,img:"https://upload.wikimedia.org/wikipedia/commons/9/9a/Slash_%282014%29.jpg"},
-{n:"Steve Harris",b:"Iron Maiden",rol:"Bajo",atk:87,def:90,pow:89,img:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Steve_Harris_Iron_Maiden.jpg"},
-{n:"Bruce Dickinson",b:"Iron Maiden",rol:"Voz",atk:91,def:75,pow:95,img:"https://upload.wikimedia.org/wikipedia/commons/8/83/Bruce_Dickinson_2008.jpg"},
-{n:"Kurt Cobain",b:"Nirvana",rol:"Voz",atk:89,def:68,pow:91,img:"https://upload.wikimedia.org/wikipedia/commons/1/1e/Kurt_Cobain_1991_cropped.jpg"},
-{n:"Dave Grohl",b:"Nirvana",rol:"Batería",atk:85,def:88,pow:90,img:"https://upload.wikimedia.org/wikipedia/commons/5/5e/Dave_Grohl_2019.jpg"},
-{n:"Ozzy Osbourne",b:"Black Sabbath",rol:"Voz",atk:88,def:62,pow:93,img:"https://upload.wikimedia.org/wikipedia/commons/8/8e/Ozzy_Osbourne_2010.jpg"},
-{n:"Tony Iommi",b:"Black Sabbath",rol:"Guitarra",atk:93,def:85,pow:97,img:"https://upload.wikimedia.org/wikipedia/commons/9/9f/Tony_Iommi_2009.jpg"}
+const music=[
+"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"
 ];
-let hand=[],selIdx=null,hp=100,pts=0;
-const audio=document.getElementById("audio");
-function getRandomNewCard(){
- // evita repetir carta que ya está en mano
- let available = fullDeck.filter(c =>!hand.some(h => h.n === c.n));
- if(available.length===0) available = fullDeck;
- return available[Math.floor(Math.random()*available.length)];
-}
-function playBand(b){
- let url=music[b]; if(!url || audio.dataset.last===b) return;
- audio.src=url; audio.volume=0.6; audio.play().catch(()=>{}); audio.dataset.last=b;
- document.getElementById("now").textContent="♪ "+b;
+const fullDeck=[
+{n:"John Lennon",b:"The Beatles",emoji:"🎤",color:"#4a6fff",rol:"Voz/Guitarra",atk:88,def:75,pow:92},
+{n:"Paul McCartney",b:"The Beatles",emoji:"🎸",color:"#6fff4a",rol:"Bajo",atk:86,def:80,pow:90},
+{n:"Freddie Mercury",b:"Queen",emoji:"👑",color:"#ff4a4a",rol:"Voz",atk:95,def:70,pow:98},
+{n:"Brian May",b:"Queen",emoji:"🎸",color:"#ff8c4a",rol:"Guitarra",atk:92,def:82,pow:94},
+{n:"Axl Rose",b:"Guns N' Roses",emoji:"🤘",color:"#ff4aff",rol:"Voz",atk:90,def:65,pow:93},
+{n:"Slash",b:"Guns N' Roses",emoji:"🎸",color:"#4affff",rol:"Guitarra Lead",atk:94,def:78,pow:96},
+{n:"Steve Harris",b:"Iron Maiden",emoji:"💀",color:"#a0a0a0",rol:"Bajo",atk:87,def:90,pow:89},
+{n:"Bruce Dickinson",b:"Iron Maiden",emoji:"✈️",color:"#ff0000",rol:"Voz",atk:91,def:75,pow:95},
+{n:"Kurt Cobain",b:"Nirvana",emoji:"🎤",color:"#ffff4a",rol:"Grunge",atk:89,def:68,pow:91},
+{n:"Dave Grohl",b:"Nirvana",emoji:"🥁",color:"#4a4aff",rol:"Batería",atk:85,def:88,pow:90},
+{n:"Ozzy Osbourne",b:"Black Sabbath",emoji:"🦇",color:"#000",rol:"Príncipe Oscuro",atk:88,def:62,pow:93},
+{n:"Tony Iommi",b:"Black Sabbath",emoji:"🎸",color:"#333",rol:"Riff Master",atk:93,def:85,pow:97}
+];
+let hand=[],selIdx=null,hp=100,pts=0; const audio=document.getElementById("audio");
+audio.src=music[0]; audio.volume=0.5; audio.play().catch(()=>{});
+function getNewCard(){
+ let pool=fullDeck.filter(c=>!hand.some(h=>h.n===c.n));
+ if(pool.length===0) pool=fullDeck;
+ let nc={...pool[Math.floor(Math.random()*pool.length)]}; nc.isNew=true; return nc;
 }
 function init(){
  hand=[]; selIdx=null; hp=100; pts=0;
- for(let i=0;i<5;i++) hand.push(fullDeck[Math.floor(Math.random()*fullDeck.length)]);
- render();
+ for(let i=0;i<5;i++) hand.push({...fullDeck[Math.floor(Math.random()*fullDeck.length)]});
  document.getElementById("pslot").innerHTML="TU CARTA";
  document.getElementById("eslot").innerHTML="RIVAL";
- document.getElementById("log").textContent="Mazo Infinito: juega 1 y entra otra nueva";
- document.getElementById("mazo").textContent=fullDeck.length;
+ document.getElementById("log").textContent="Mazo Infinito: juega y entra una nueva";
+ render();
 }
 function render(){
  let g=document.getElementById("game"); g.innerHTML="";
  hand.forEach((c,i)=>{
-  let d=document.createElement("div");
-  d.className="card"+(i===selIdx?" selected":"")+(c.isNew?" new":"");
-  if(c.isNew) setTimeout(()=>c.isNew=false,600);
-  d.innerHTML=`<img class="card-img" referrerpolicy="no-referrer" src="${c.img}" onerror="this.src='${FALLBACK}'"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div class="card-role">${c.rol}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`;
+  let d=document.createElement("div"); d.className="card"+(i===selIdx?" selected":"");
+  d.innerHTML=`<div class="card-img" style="background:${c.color}">${c.emoji}</div><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div style="font-size:.6rem;color:#aaa;padding:0 6px">${c.rol}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`;
   d.onclick=()=>choose(i); g.appendChild(d);
  });
  document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts;
 }
 function choose(i){
  selIdx=i; let c=hand[i];
- document.getElementById("pslot").innerHTML=`<div><img referrerpolicy="no-referrer" src="${c.img}" onerror="this.src='${FALLBACK}'" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${c.b}</div><div style="font-weight:bold">${c.n}</div><div style="font-size:.7rem">ATK ${c.atk} DEF ${c.def} POW ${c.pow}</div></div>`;
- playBand(c.b); render();
+ document.getElementById("pslot").innerHTML=`<div style="width:100%"><div style="font-size:60px;background:${c.color};padding:10px">${c.emoji}</div><div style="color:#ffcc00">${c.b}</div><b>${c.n}</b><div style="font-size:.7rem">ATK ${c.atk} DEF ${c.def} POW ${c.pow}</div></div>`;
+ if(audio.src!==music[fullDeck.indexOf(fullDeck.find(x=>x.b===c.b))%2]){audio.src=music[Math.floor(Math.random()*music.length)]; audio.play().catch(()=>{});}
+ document.getElementById("now").textContent="♪ "+c.b+" - "+c.n;
+ render();
 }
 function pelear(){
- if(selIdx===null){alert("Elige carta");return}
- let p=hand[selIdx];
- let e=fullDeck[Math.floor(Math.random()*fullDeck.length)];
- document.getElementById("eslot").innerHTML=`<div><img referrerpolicy="no-referrer" src="${e.img}" onerror="this.src='${FALLBACK}'" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${e.b}</div><div style="font-weight:bold">${e.n}</div><div style="font-size:.7rem">ATK ${e.atk} DEF ${e.def} POW ${e.pow}</div></div>`;
- let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow;
- let bono=p.b===e.b; if(bono) ps=Math.floor(ps*1.2);
+ if(selIdx===null){alert("¡Elige carta!");return}
+ let p=hand[selIdx]; let e=fullDeck[Math.floor(Math.random()*fullDeck.length)];
+ document.getElementById("eslot").innerHTML=`<div style="width:100%"><div style="font-size:60px;background:${e.color};padding:10px">${e.emoji}</div><div style="color:#ffcc00">${e.b}</div><b>${e.n}</b><div style="font-size:.7rem">ATK ${e.atk} DEF ${e.def} POW ${e.pow}</div></div>`;
+ let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow; let bono=p.b===e.b; if(bono) ps=Math.floor(ps*1.2);
  let log=document.getElementById("log");
- if(ps>=es){pts+=bono?15:10; log.textContent=`GANASTE! ${p.n} ${ps} vs ${e.n} ${es} ${bono?'+BONO':''} -> Entra carta nueva!`; log.style.color="#0f0"}
- else{hp-=15; if(hp<0) hp=0; log.textContent=`PERDISTE! ${p.n} ${ps} vs ${e.n} ${es} -> Entra carta nueva!`; log.style.color="#f44"}
-
- // AQUI ESTA EL CAMBIO QUE PEDISTE: SACA LA USADA Y METE NUEVA
- hand.splice(selIdx,1);
- let nueva = getRandomNewCard();
- nueva.isNew = true;
- hand.push(nueva);
- selIdx=null;
- document.getElementById("pslot").innerHTML="TU CARTA - Nueva entrando...";
-
- render();
- if(hp<=0){alert("GAME OVER! Puntos: "+pts); init()}
+ if(ps>=es){pts+=bono?15:10; log.textContent=`GANASTE! ${p.n} ${ps} vs ${e.n} ${es} ${bono?'+BONO BANDA!':''} -> ¡NUEVA CARTA ENTRA!`; log.style.color="#0f0";}
+ else{hp-=15; if(hp<0) hp=0; log.textContent=`PERDISTE! ${p.n} ${ps} vs ${e.n} ${es} -15 HP -> ¡NUEVA CARTA ENTRA!`; log.style.color="#f44";}
+ hand.splice(selIdx,1); hand.push(getNewCard()); selIdx=null; render();
+ if(hp<=0){alert("GAME OVER! Puntos: "+pts); init();}
 }
 init();
 </script>
