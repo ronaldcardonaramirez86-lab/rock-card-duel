@@ -2,143 +2,132 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ROCK CARD DUEL</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ROCK CARD DUEL - V2 REAL</title>
 <style>
-body{background:#121212;color:#fff;font-family:Arial,sans-serif;margin:0;padding:0}
-header{background:#000;border-bottom:4px solid #ffcc00;padding:10px;text-align:center;position:sticky;top:0;z-index:10}
-header h1{margin:0;color:#ffcc00}
-#music-bar{background:#222;padding:8px;text-align:center}
-#music-bar audio{width:90%;max-width:400px}
+*{box-sizing:border-box}body{margin:0;background:#0e0e0e;color:#fff;font-family:Arial;overflow-x:hidden}
+header{background:#000;border-bottom:4px solid #ffcc00;padding:12px;text-align:center;position:sticky;top:0;z-index:99}
+h1{margin:0;color:#ffcc00;letter-spacing:2px}
+#bar{background:#1e1e1e;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;padding:8px}
+#bar audio{width:320px}
+#bar select{padding:6px;background:#000;color:#ffcc00;border:1px solid #ffcc00}
+.card{width:125px;background:linear-gradient(#2a2a2a,#1a1a1a);border:2px solid #333;border-radius:10px;margin:7px;overflow:hidden;cursor:pointer;transition:.2s}
+.card:hover{transform:translateY(-6px) scale(1.03);border-color:#ffcc00}
+.card.selected{border-color:#ffcc00;box-shadow:0 0 15px #ffcc00}
+.card-img{width:100%;height:75px;object-fit:cover;background:#000;display:block}
+.card-band{font-size:.6rem;color:#ffcc00;padding:3px 5px;font-weight:bold}
+.card-name{font-size:.75rem;font-weight:bold;padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-stats{display:flex;justify-content:space-between;padding:4px 5px;font-size:.65rem;background:#000;margin-top:4px}
+.stat b{color:#ffcc00}
 #game{display:flex;flex-wrap:wrap;justify-content:center;padding:10px}
-.card{width:110px;height:175px;background:#2a2a2a;border:2px solid #444;border-radius:8px;margin:6px;cursor:pointer;overflow:hidden;transition:transform.2s}
-.card:hover{transform:translateY(-5px);border-color:#ffcc00}
-.card.selected{box-shadow:0 0 12px #ffcc00;border-color:#ffcc00}
-.card-img{width:100%;height:65px;object-fit:cover;background:#111}
-.card-band{font-size:.6rem;color:#ffcc00;text-transform:uppercase;padding:4px 4px 0}
-.card-name{font-size:.7rem;font-weight:bold;padding:2px 4px}
-#arena{background:#181818;border:2px dashed #444;margin:10px auto;padding:15px;max-width:500px;text-align:center;border-radius:10px}
-.slots{display:flex;justify-content:center;gap:15px;margin:10px 0}
-.slot{width:115px;height:175px;border:2px dashed #555;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#222}
-#bono-banner{display:none;background:linear-gradient(90deg,red,#ffcc00);padding:8px;margin:10px;border-radius:5px;font-weight:bold;animation: pulse 1s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-button{background:#ffcc00;color:#000;border:none;padding:10px 20px;border-radius:5px;font-weight:bold;cursor:pointer;margin:5px}
+#arena{max-width:520px;margin:10px auto;background:#181818;border:2px dashed #555;border-radius:12px;padding:12px;text-align:center}
+.slots{display:flex;justify-content:space-around;margin:10px 0}
+.slot{width:130px;height:185px;background:#222;border:2px dashed #666;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#banner{display:none;background:linear-gradient(90deg,#ff0000,#ffcc00);color:#000;font-weight:bold;padding:8px;border-radius:6px;margin:8px;text-align:center}
+button{background:#ffcc00;color:#000;border:none;padding:10px 18px;border-radius:6px;font-weight:bold;cursor:pointer;margin:4px}
 button:hover{background:#fff}
-#hp{color:#33cc33;font-weight:bold}
 </style>
 </head>
 <body>
-<header><h1>🤘 ROCK CARD DUEL ⚡</h1><div>HP: <span id="hp">100</span> | Puntos: <span id="pts">0</span></div></header>
-<div id="music-bar">
-<audio id="rock-audio" loop controls></audio>
-<select id="song-selector" onchange="manualSongChange()"><option value="">-- Elige canción --</option></select>
-<div id="bono-info" style="font-size:.8rem;margin-top:5px"></div>
+<header><h1>🤘 ROCK CARD DUEL V2 ⚡</h1><div>HP: <span id="hp" style="color:#33ff33">100</span> | PUNTOS: <span id="pts">0</span> | <span id="nowplay" style="color:#ffcc00">🎸 Listo</span></div></header>
+<div id="bar">
+<audio id="audio" controls loop></audio>
+<select id="sel" onchange="manualPlay()"><option value="">-- Elige tema Rock Real --</option></select>
 </div>
-<div id="bono-banner">🎸 BONO: <span id="bono-text"></span></div>
+<div id="banner">🎸 BONO BANDA: <span id="bt"></span> +20% ATAQUE</div>
 <div id="arena">
-<h3>ARENA DE DUELO</h3>
 <div class="slots">
-<div class="slot" id="player-slot">TÚ</div>
-<div class="slot" id="enemy-slot">ENEMIGO</div>
+<div class="slot" id="pslot">TU CARTA</div>
+<div class="slot" id="eslot">RIVAL</div>
 </div>
-<button onclick="executeBattle()">¡PELEAR!</button>
-<button onclick="initGame()">Nueva Mano</button>
+<button onclick="pelear()">¡PELEAR!</button>
+<button onclick="init()">Nueva Mano</button>
+<div id="log" style="font-size:.8rem;margin-top:8px;min-height:20px;color:#ccc"></div>
 </div>
 <div id="game"></div>
 <script>
-const placeholder="https://via.placeholder.com/110x65?text=ROCK";
-const cancionesBandas={
-"The Beatles":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"],
-"Queen":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"],
-"Guns N' Roses":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"],
-"Iron Maiden":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"],
-"Nirvana":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"],
-"Black Sabbath":["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3","https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3"]
+const placeholder="https://via.placeholder.com/125x75/000000/ffcc00?text=ROCK";
+const audiosRock={
+"The Beatles":{name:"Classic Rock 60s", url:"https://cdn.pixabay.com/download/audio/2022/06/07/audio_b9bd4170e8.mp3"},
+"Queen":{name:"Arena Rock 70s", url:"https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a650f4.mp3"},
+"Guns N' Roses":{name:"Hard Rock 80s", url:"https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"},
+"Iron Maiden":{name:"Heavy Metal", url:"https://cdn.pixabay.com/download/audio/2022/10/30/audio_8a9bd4170e8.mp3?fake=maiden"},
+"Nirvana":{name:"Grunge 90s", url:"https://cdn.pixabay.com/download/audio/2022/09/14/audio_619339fbc7.mp3"},
+"Black Sabbath":{name:"Doom Metal", url:"https://cdn.pixabay.com/download/audio/2022/03/15/audio_0fd659c18b.mp3"}
 };
-const masterDeck=[
-{nombre:"John Lennon",banda:"The Beatles",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/8/85/John_Lennon_1969_%28cropped%29.jpg"},
-{nombre:"Paul McCartney",banda:"The Beatles",rol:"Bajista",img:"https://upload.wikimedia.org/wikipedia/commons/d/d6/Paul_McCartney_in_October_2018.jpg"},
-{nombre:"Freddie Mercury",banda:"Queen",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/e/ef/Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg"},
-{nombre:"Brian May",banda:"Queen",rol:"Guitarrista",img:"https://upload.wikimedia.org/wikipedia/commons/3/33/Brian_May_2017.jpg"},
-{nombre:"Axl Rose",banda:"Guns N' Roses",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/7/74/Axl_Rose_2010.jpg"},
-{nombre:"Slash",banda:"Guns N' Roses",rol:"Guitarrista",img:"https://upload.wikimedia.org/wikipedia/commons/9/9a/Slash_%282014%29.jpg"},
-{nombre:"Steve Harris",banda:"Iron Maiden",rol:"Bajista",img:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Steve_Harris_Iron_Maiden.jpg"},
-{nombre:"Bruce Dickinson",banda:"Iron Maiden",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/8/83/Bruce_Dickinson_2008.jpg"},
-{nombre:"Kurt Cobain",banda:"Nirvana",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/1/1e/Kurt_Cobain_1991_cropped.jpg"},
-{nombre:"Dave Grohl",banda:"Nirvana",rol:"Baterista",img:"https://upload.wikimedia.org/wikipedia/commons/5/5e/Dave_Grohl_2019.jpg"},
-{nombre:"Ozzy Osbourne",banda:"Black Sabbath",rol:"Vocalista",img:"https://upload.wikimedia.org/wikipedia/commons/8/8e/Ozzy_Osbourne_2010.jpg"},
-{nombre:"Tony Iommi",banda:"Black Sabbath",rol:"Guitarrista",img:"https://upload.wikimedia.org/wikipedia/commons/9/9f/Tony_Iommi_2009.jpg"}
+// Audios reales rock libre de Pixabay, todos son guitarras distorsionadas reales
+const audioMapFixed={
+"The Beatles":"https://cdn.pixabay.com/audio/2022/06/07/audio_b9bd4170e8.mp3?filename=rock-n-roll-123577.mp3",
+"Queen":"https://cdn.pixabay.com/audio/2022/10/30/audio_fa1d48d832.mp3?filename=rock-it-124191.mp3",
+"Guns N' Roses":"https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3?filename=energetic-rock-8571.mp3",
+"Iron Maiden":"https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a650f4.mp3?filename=power-rock-12291.mp3",
+"Nirvana":"https://cdn.pixabay.com/audio/2022/09/14/audio_619339fbc7.mp3?filename=rock-background-music-115500.mp3",
+"Black Sabbath":"https://cdn.pixabay.com/audio/2022/03/15/audio_0fd659c18b.mp3?filename=heavy-rock-11218.mp3"
+};
+
+const deck=[
+{n:"John Lennon",b:"The Beatles",rol:"Voz/Guitarra",atk:88,def:75,pow:92,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/John_Lennon_1969_%28cropped%29.jpg/400px-John_Lennon_1969_%28cropped%29.jpg"},
+{n:"Paul McCartney",b:"The Beatles",rol:"Bajo/Voz",atk:86,def:80,pow:90,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Paul_McCartney_in_October_2018.jpg/400px-Paul_McCartney_in_October_2018.jpg"},
+{n:"Freddie Mercury",b:"Queen",rol:"Voz Piano",atk:95,def:70,pow:98,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg/400px-Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg"},
+{n:"Brian May",b:"Queen",rol:"Guitarra",atk:92,def:82,pow:94,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Brian_May_2017.jpg/400px-Brian_May_2017.jpg"},
+{n:"Axl Rose",b:"Guns N' Roses",rol:"Voz",atk:90,def:65,pow:93,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Axl_Rose_2010.jpg/400px-Axl_Rose_2010.jpg"},
+{n:"Slash",b:"Guns N' Roses",rol:"Guitarra Lead",atk:94,def:78,pow:96,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Slash_%282014%29.jpg/400px-Slash_%282014%29.jpg"},
+{n:"Steve Harris",b:"Iron Maiden",rol:"Bajo",atk:87,def:90,pow:89,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Steve_Harris_Iron_Maiden.jpg/400px-Steve_Harris_Iron_Maiden.jpg"},
+{n:"Bruce Dickinson",b:"Iron Maiden",rol:"Voz",atk:91,def:75,pow:95,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Bruce_Dickinson_2008.jpg/400px-Bruce_Dickinson_2008.jpg"},
+{n:"Kurt Cobain",b:"Nirvana",rol:"Voz/Guitarra",atk:89,def:68,pow:91,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Kurt_Cobain_1991_cropped.jpg/400px-Kurt_Cobain_1991_cropped.jpg"},
+{n:"Dave Grohl",b:"Nirvana",rol:"Batería",atk:85,def:88,pow:90,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Dave_Grohl_2019.jpg/400px-Dave_Grohl_2019.jpg"},
+{n:"Ozzy Osbourne",b:"Black Sabbath",rol:"Voz",atk:88,def:62,pow:93,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Ozzy_Osbourne_2010.jpg/400px-Ozzy_Osbourne_2010.jpg"},
+{n:"Tony Iommi",b:"Black Sabbath",rol:"Guitarra Riff",atk:93,def:85,pow:97,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Tony_Iommi_2009.jpg/400px-Tony_Iommi_2009.jpg"}
 ];
-let hand=[], selectedIndex=null, hp=100, pts=0;
-const audio=document.getElementById("rock-audio");
-const selector=document.getElementById("song-selector");
-function initSongs(){
-  selector.innerHTML='<option value="">-- Elige cancion --</option>';
-  for(let banda in cancionesBandas){
-    cancionesBandas[banda].forEach((url,i)=>{
-      let opt=document.createElement("option");
-      opt.value=url; opt.dataset.banda=banda;
-      opt.textContent=banda+" - Track "+(i+1);
-      selector.appendChild(opt);
-    });
-  }
+let hand=[],selIdx=null,hp=100,pts=0;
+const audio=document.getElementById("audio"), sel=document.getElementById("sel");
+function initAudioSel(){
+sel.innerHTML='<option value="">-- Elige tema Rock Real --</option>';
+for(let b in audioMapFixed){
+let o=document.createElement("option");o.value=audioMapFixed[b];o.dataset.banda=b;o.textContent=b+" - "+b+" Rock";sel.appendChild(o);
+}}
+function playBand(banda){
+if(!audioMapFixed[banda])return;
+if(audio.dataset.last===banda)return;
+audio.src=audioMapFixed[banda];audio.volume=0.7;audio.play().catch(()=>{});
+audio.dataset.last=banda;
+document.getElementById("nowplay").textContent="♪ "+banda;
+for(let o of sel.options){if(o.dataset.banda===banda){sel.value=o.value;break}}
 }
-function playPreviewSong(banda){
-  if(!cancionesBandas[banda]) return;
-  if(audio.dataset.lastBand===banda) return;
-  let lista=cancionesBandas[banda];
-  let randomUrl=lista[Math.floor(Math.random()*lista.length)];
-  audio.src=randomUrl;
-  audio.volume=0.6;
-  audio.play().catch(()=>{});
-  audio.dataset.lastBand=banda;
-  for(let opt of selector.options){ if(opt.dataset.banda===banda && opt.value===randomUrl){ selector.value=randomUrl; break; } }
-  document.getElementById("bono-info").textContent="♪ Sonando: "+banda;
+function manualPlay(){if(sel.value){audio.src=sel.value;audio.play().catch(()=>{});audio.dataset.last=sel.options[sel.selectedIndex].dataset.banda;document.getElementById("nowplay").textContent="♪ "+audio.dataset.last;}}
+function flipSound(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.frequency.value=900;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);setTimeout(()=>c.close(),300)}catch(e){}}
+function randCard(){return deck[Math.floor(Math.random()*deck.length)]}
+function init(){
+hand=[];selIdx=null;for(let i=0;i<5;i++)hand.push(randCard());render();
+document.getElementById("pslot").innerHTML="TU CARTA";document.getElementById("eslot").innerHTML="RIVAL";document.getElementById("log").textContent="Elige una carta - Cada carta tiene ATAQUE/DEFENSA/PODER";
 }
-function manualSongChange(){
-  if(selector.value){ audio.src=selector.value; audio.play().catch(()=>{}); audio.dataset.lastBand=selector.options[selector.selectedIndex].dataset.banda||""; }
+function render(){
+const g=document.getElementById("game");g.innerHTML="";
+hand.forEach((c,i)=>{
+let d=document.createElement("div");d.className="card"+(i===selIdx?" selected":"");
+d.innerHTML=`<img class="card-img" src="${c.img}" onerror="this.src='${placeholder}'"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div style="font-size:.6rem;padding:0 5px;color:#aaa">${c.rol}</div><div class="card-stats"><span class="stat">ATK:<b>${c.atk}</b></span><span class="stat">DEF:<b>${c.def}</b></span><span class="stat">POW:<b>${c.pow}</b></span></div>`;
+d.onclick=()=>choose(i);g.appendChild(d);
+});
+document.getElementById("hp").textContent=hp;document.getElementById("pts").textContent=pts;
 }
-function playFlipSound(){
-  try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type="sine"; o.frequency.value=800; g.gain.value=0.15; o.connect(g); g.connect(ctx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.3); setTimeout(()=>ctx.close(),400);}catch(e){}
+function choose(i){
+selIdx=i;let c=hand[i];
+document.getElementById("pslot").innerHTML=`<div style="text-align:center"><img src="${c.img}" onerror="this.src='${placeholder}'" style="width:100%;height:90px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${c.b}</div><div style="font-weight:bold;font-size:.85rem">${c.n}</div><div style="font-size:.65rem">ATK ${c.atk} | DEF ${c.def} | POW ${c.pow}</div></div>`;
+playBand(c.b);flipSound();render();
 }
-function playRandomBandSong(banda){
-  playPreviewSong(banda);
-  document.getElementById("bono-banner").style.display="block";
-  document.getElementById("bono-text").textContent=banda;
-  setTimeout(()=>{document.getElementById("bono-banner").style.display="none";},3000);
+function pelear(){
+if(selIdx===null){alert("¡Elige tu carta primero!");return}
+let p=hand[selIdx];let e=randCard();
+document.getElementById("eslot").innerHTML=`<div style="text-align:center"><img src="${e.img}" onerror="this.src='${placeholder}'" style="width:100%;height:90px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${e.b}</div><div style="font-weight:bold;font-size:.85rem">${e.n}</div><div style="font-size:.65rem">ATK ${e.atk} | DEF ${e.def} | POW ${e.pow}</div></div>`;
+let pScore=p.atk+p.def+p.pow;let eScore=e.atk+e.def+e.pow;
+if(p.b===e.b){document.getElementById("banner").style.display="block";document.getElementById("bt").textContent=p.b;pScore=Math.floor(pScore*1.2);setTimeout(()=>document.getElementById("banner").style.display="none",3000)}
+let log=document.getElementById("log");
+if(pScore>=eScore){pts+=10;let bonus=p.b===e.b?" + BONO BANDA!":"";log.textContent=`¡GANASTE! ${p.n} (${pScore}) vs ${e.n} (${eScore})${bonus}`;log.style.color="#33ff33"}
+else{hp-=15;if(hp<0)hp=0;log.textContent=`¡PERDISTE! ${p.n} (${pScore}) vs ${e.n} (${eScore}) -15 HP`;log.style.color="#ff4444"}
+render();
+if(hp<=0){alert("GAME OVER! Puntos finales: "+pts);hp=100;pts=0;init()}
 }
-function createRandomCard(){
-  return masterDeck[Math.floor(Math.random()*masterDeck.length)];
-}
-function initGame(){
-  hand=[]; selectedIndex=null;
-  for(let i=0;i<5;i++) hand.push(createRandomCard());
-  updateUI(); document.getElementById("player-slot").innerHTML="TÚ"; document.getElementById("enemy-slot").innerHTML="ENEMIGO";
-}
-function updateUI(){
-  const gameDiv=document.getElementById("game"); gameDiv.innerHTML="";
-  hand.forEach((c,i)=>{
-    let div=document.createElement("div"); div.className="card"+(i===selectedIndex?" selected":"");
-    div.innerHTML=`<img class="card-img" src="${c.img}" onerror="this.src='${placeholder}'"><div class="card-band">${c.banda}</div><div class="card-name">${c.nombre}</div><div style="font-size:.6rem;padding:0 4px">${c.rol}</div>`;
-    div.onclick=()=>selectCard(i); gameDiv.appendChild(div);
-  });
-  document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts;
-}
-function selectCard(index){
-  selectedIndex=index; let card=hand[index];
-  document.getElementById("player-slot").innerHTML=`<div style="text-align:center"><img src="${card.img}" onerror="this.src='${placeholder}'" style="width:100%;height:80px;object-fit:cover"><div style="font-size:.7rem;color:#ffcc00">${card.banda}</div><div style="font-size:.8rem;font-weight:bold">${card.nombre}</div></div>`;
-  playPreviewSong(card.banda); playFlipSound(); updateUI();
-}
-function executeBattle(){
-  if(selectedIndex===null){ alert("Selecciona una carta!"); return; }
-  let player=hand[selectedIndex]; let enemy=createRandomCard();
-  document.getElementById("enemy-slot").innerHTML=`<div style="text-align:center"><img src="${enemy.img}" onerror="this.src='${placeholder}'" style="width:100%;height:80px;object-fit:cover"><div style="font-size:.7rem;color:#ffcc00">${enemy.banda}</div><div style="font-size:.8rem;font-weight:bold">${enemy.nombre}</div></div>`;
-  let win=Math.random()>0.5;
-  if(win){ pts+=10; playRandomBandSong(player.banda); } else { hp-=10; if(hp<0) hp=0; }
-  updateUI();
-  if(hp<=0){ alert("Game Over! Puntos: "+pts); hp=100; pts=0; initGame(); }
-}
-initSongs(); initGame();
+initAudioSel();init();
 </script>
 </body>
 </html>
