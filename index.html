@@ -2,93 +2,57 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ROCK CARD DUEL V6 - REAL</title>
+<title>ROCK CARD DUEL V7 - FULL</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#070707;color:#fff;font-family:Arial}
+*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Arial}
 header{background:#000;border-bottom:4px solid #ffcc00;padding:10px;text-align:center;position:sticky;top:0;z-index:10}
-.card{width:155px;background:#1e1e1e;border:2px solid #444;border-radius:12px;margin:8px;display:inline-block;overflow:hidden;cursor:pointer;vertical-align:top}
-.card.selected{border-color:#ffcc00;box-shadow:0 0 20px #ffcc00;transform:scale(1.07)}
-.card-img{width:100%;height:115px;object-fit:cover;background:#000;display:block}
-.card-band{font-size:.62rem;color:#ffcc00;background:#000;padding:4px 6px;font-weight:bold}
-.card-name{font-weight:bold;padding:4px 6px;font-size:.86rem}
+#yt{width:100%;max-width:640px;height:200px;border:3px solid #ffcc00;border-radius:10px;margin:10px auto;display:block}
+.card{width:155px;background:#1e1e1e;border:2px solid #444;border-radius:12px;margin:8px;display:inline-block;overflow:hidden;cursor:pointer}
+.card.selected{border-color:#ffcc00;box-shadow:0 0 20px #ffcc00;transform:scale(1.06)}
+.card-img{width:100%;height:120px;object-fit:cover;background:#222;display:block}
+.card-band{color:#ffcc00;font-size:.62rem;font-weight:bold;background:#000;padding:4px 6px}
+.card-name{font-weight:bold;padding:4px 6px;font-size:.85rem}
 .card-stats{display:flex;justify-content:space-between;background:#000;padding:6px;font-size:.7rem}
 .card-stats b{color:#ffcc00}
-#arena{max-width:620px;margin:14px auto;background:#111;border:2px dashed #555;border-radius:14px;padding:14px;text-align:center}
-.slot{width:165px;height:240px;background:#222;border:2px dashed #666;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin:8px;flex-direction:column;overflow:hidden}
+#arena{max-width:620px;margin:10px auto;background:#111;border:2px dashed #555;border-radius:14px;padding:10px;text-align:center}
+.slot{width:165px;height:230px;background:#222;border:2px dashed #666;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin:8px;flex-direction:column;overflow:hidden}
 button{background:#ffcc00;color:#000;border:none;padding:11px 18px;border-radius:8px;font-weight:bold;cursor:pointer;margin:6px}
-#spotify{width:100%;max-width:620px;margin:10px auto;display:block;border-radius:12px}
 </style>
 </head>
 <body>
 <header>
-<h1>🤘 ROCK CARD DUEL V6 - REAL 🤘</h1>
-<div>HP:<span id="hp" style="color:#0f0">100</span> | PTS:<span id="pts">0</span> | <span id="now">Toca una carta para escuchar su banda</span></div>
-<iframe id="spotify" style="height:80px;border:0" src="https://open.spotify.com/embed/track/7tFiyTwD0nx5aCOgPqSiAb?utm_source=generator" allow="autoplay; clipboard-write; encrypted-media"></iframe>
+<h1>🤘 ROCK CARD DUEL V7 - FULL MUSIC 🤘</h1>
+<div>HP:<span id="hp" style="color:#0f0">100</span> | PTS:<span id="pts">0</span> | <span id="now" style="color:#ffcc00">Toca una carta = Suena su canción completa</span></div>
+<iframe id="yt" src="https://www.youtube.com/embed/fJ9rUzIMcZQ?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </header>
-
 <div id="arena">
 <div><div class="slot" id="pslot">TU CARTA</div><div class="slot" id="eslot">RIVAL</div></div>
-<button onclick="pelear()">⚔️ ¡PELEAR!</button><button onclick="init()">🔄 Nueva</button>
-<div id="log" style="margin-top:8px;color:#0f0;font-weight:bold;min-height:20px"></div>
+<button onclick="pelear()">⚔️ PELEAR!</button><button onclick="init()">🔄 Nueva</button>
+<div id="log" style="color:#0f0;font-weight:bold;margin-top:8px"></div>
 </div>
-<div id="game" style="text-align:center;padding:12px"></div>
-
+<div id="game" style="text-align:center"></div>
 <script>
-// TRUCO para que Wikipedia SI cargue: proxy weserv.nl
-function imgProxy(wikiUrl){ return "https://images.weserv.nl/?url="+encodeURIComponent(wikiUrl.replace("https://",""))+"&w=300&h=220&fit=cover&output=jpg"; }
-
 const fullDeck=[
-{n:"John Lennon",b:"The Beatles",spotify:"7xPhfUan2yNtyFG0cUWkt8",rol:"Voz",atk:88,def:75,pow:92,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/8/85/John_Lennon_1969_%28cropped%29.jpg")},
-{n:"Paul McCartney",b:"The Beatles",spotify:"7xPhfUan2yNtyFG0cUWkt8",rol:"Bajo",atk:86,def:80,pow:90,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/d/d6/Paul_McCartney_in_October_2018.jpg")},
-{n:"Freddie Mercury",b:"Queen",spotify:"7tFiyTwD0nx5aCOgPqSiAb",rol:"Voz",atk:95,def:70,pow:98,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/e/ef/Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg")},
-{n:"Brian May",b:"Queen",spotify:"6I3mqTwhRpn34PGWQttleA",rol:"Guitarra",atk:92,def:82,pow:94,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/3/33/Brian_May_2017.jpg")},
-{n:"Axl Rose",b:"Guns N' Roses",spotify:"2eAvDnpDpdpBuJpR1lB34e",rol:"Voz",atk:90,def:65,pow:93,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/7/74/Axl_Rose_2010.jpg")},
-{n:"Slash",b:"Guns N' Roses",spotify:"7o2CTH4ctstm8TNelqjb51",rol:"Guitarra",atk:94,def:78,pow:96,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/9/9a/Slash_%282014%29.jpg")},
-{n:"Bruce Dickinson",b:"Iron Maiden",spotify:"2k2qR60HTgY2Q2uYrT8Q3e",rol:"Voz",atk:91,def:75,pow:95,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/8/83/Bruce_Dickinson_2008.jpg")},
-{n:"Steve Harris",b:"Iron Maiden",spotify:"2k2qR60HTgY2Q2uYrT8Q3e",rol:"Bajo",atk:87,def:90,pow:89,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/7/7b/Steve_Harris_Iron_Maiden.jpg")},
-{n:"Kurt Cobain",b:"Nirvana",spotify:"4CeeEOM32jQcH3eN9Q2dGj",rol:"Voz",atk:89,def:68,pow:91,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/1/1e/Kurt_Cobain_1991_cropped.jpg")},
-{n:"Dave Grohl",b:"Nirvana",spotify:"4CeeEOM32jQcH3eN9Q2dGj",rol:"Batería",atk:85,def:88,pow:90,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/5/5e/Dave_Grohl_2019.jpg")},
-{n:"Ozzy Osbourne",b:"Black Sabbath",spotify:"7Hkq58RyuiZJ2D2pM4k1h8",rol:"Voz",atk:88,def:62,pow:93,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/8/8e/Ozzy_Osbourne_2010.jpg")},
-{n:"Tony Iommi",b:"Black Sabbath",spotify:"7Hkq58RyuiZJ2D2pM4k1h8",rol:"Guitarra",atk:93,def:85,pow:97,img:imgProxy("https://upload.wikimedia.org/wikipedia/commons/9/9f/Tony_Iommi_2009.jpg")}
+{n:"John Lennon",b:"The Beatles",yt:"A_MjCqQoLLA",atk:88,def:75,pow:92,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/8/85/John_Lennon_1969_%28cropped%29.jpg&w=300"},
+{n:"Freddie Mercury",b:"Queen",yt:"fJ9rUzIMcZQ",atk:95,def:70,pow:98,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/e/ef/Freddie_Mercury_performing_in_New_Haven%2C_CT%2C_November_1977.jpg&w=300"},
+{n:"Slash",b:"Guns N' Roses",yt:"1w7OgIMMRc4",atk:94,def:78,pow:96,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/9/9a/Slash_%282014%29.jpg&w=300"},
+{n:"Ozzy Osbourne",b:"Black Sabbath",yt:"0qanF-91aJo",atk:88,def:62,pow:93,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/8/8e/Ozzy_Osbourne_2010.jpg&w=300"},
+{n:"Kurt Cobain",b:"Nirvana",yt:"hTWKbfoikeg",atk:89,def:68,pow:91,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/1/1e/Kurt_Cobain_1991_cropped.jpg&w=300"},
+{n:"Bruce Dickinson",b:"Iron Maiden",yt:"90X5Nw4IjGA",atk:91,def:75,pow:95,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/8/83/Bruce_Dickinson_2008.jpg&w=300"},
+{n:"Axl Rose",b:"Guns N' Roses",yt:"8SbUC-UaAxE",atk:90,def:65,pow:93,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/7/74/Axl_Rose_2010.jpg&w=300"},
+{n:"Paul McCartney",b:"The Beatles",yt:"QcIy9NiNbmo",atk:86,def:80,pow:90,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/d/d6/Paul_McCartney_in_October_2018.jpg&w=300"},
+{n:"Dave Grohl",b:"Nirvana",yt:"4PUN_E0K0Z0",atk:85,def:88,pow:90,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/5/5e/Dave_Grohl_2019.jpg&w=300"},
+{n:"Brian May",b:"Queen",yt:"6Ejga4kJUts",atk:92,def:82,pow:94,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/3/33/Brian_May_2017.jpg&w=300"},
+{n:"Tony Iommi",b:"Black Sabbath",yt:"LCCiwPEdEpg",atk:93,def:85,pow:97,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/9/9f/Tony_Iommi_2009.jpg&w=300"},
+{n:"Steve Harris",b:"Iron Maiden",yt:"X4bgXH3sJ2Q",atk:87,def:90,pow:89,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/7/7b/Steve_Harris_Iron_Maiden.jpg&w=300"}
 ];
-
 let hand=[],selIdx=null,hp=100,pts=0;
-function getNewCard(){ let pool=fullDeck.filter(c=>!hand.some(h=>h.n===c.n)); if(pool.length===0) pool=fullDeck; return {...pool[Math.floor(Math.random()*pool.length)]}; }
-function playRealMusic(card){
- document.getElementById("spotify").src="https://open.spotify.com/embed/track/"+card.spotify+"?utm_source=generator&theme=0";
- document.getElementById("now").textContent="♪ Sonando: "+card.b+" - "+card.n;
-}
-function init(){
- hand=[]; selIdx=null; for(let i=0;i<5;i++) hand.push({...fullDeck[Math.floor(Math.random()*fullDeck.length)]});
- document.getElementById("pslot").innerHTML="TU CARTA"; document.getElementById("eslot").innerHTML="RIVAL";
- document.getElementById("log").textContent="V6: Fotos reales + Música real de cada banda + Mazo cambia";
- render();
-}
-function render(){
- let g=document.getElementById("game"); g.innerHTML="";
- hand.forEach((c,i)=>{
-  let d=document.createElement("div"); d.className="card"+(i===selIdx?" selected":"");
-  d.innerHTML=`<img class="card-img" src="${c.img}" loading="lazy" onerror="this.style.background='${'#'+Math.floor(Math.random()*16777215).toString(16)}'"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div style="font-size:.6rem;color:#aaa;padding:0 6px">${c.rol}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`;
-  d.onclick=()=>choose(i); g.appendChild(d);
- });
- document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts;
-}
-function choose(i){
- selIdx=i; let c=hand[i];
- document.getElementById("pslot").innerHTML=`<div style="width:100%"><img src="${c.img}" style="width:100%;height:130px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${c.b}</div><b>${c.n}</b><div style="font-size:.7rem">ATK ${c.atk} DEF ${c.def} POW ${c.pow}</div></div>`;
- playRealMusic(c); render();
-}
-function pelear(){
- if(selIdx===null){alert("Elige carta");return}
- let p=hand[selIdx]; let e=fullDeck[Math.floor(Math.random()*fullDeck.length)];
- document.getElementById("eslot").innerHTML=`<div style="width:100%"><img src="${e.img}" style="width:100%;height:130px;object-fit:cover"><div style="color:#ffcc00;font-size:.7rem">${e.b}</div><b>${e.n}</b><div style="font-size:.7rem">ATK ${e.atk} DEF ${e.def} POW ${e.pow}</div></div>`;
- let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow; let bono=p.b===e.b; if(bono) ps=Math.floor(ps*1.2);
- let log=document.getElementById("log");
- if(ps>=es){pts+=bono?15:10; log.textContent=`GANASTE! ${p.n} ${ps} vs ${e.n} ${es} -> ¡NUEVA CARTA!`; log.style.color="#0f0";}
- else{hp-=15; if(hp<0) hp=0; log.textContent=`PERDISTE! ${p.n} ${ps} vs ${e.n} ${es} -> ¡NUEVA CARTA!`; log.style.color="#f44";}
- hand.splice(selIdx,1); hand.push(getNewCard()); selIdx=null; render();
- if(hp<=0){alert("GAME OVER! Puntos: "+pts); init();}
-}
+function getNew(){ let pool=fullDeck.filter(c=>!hand.some(h=>h.n===c.n)); if(pool.length===0) pool=fullDeck; return {...pool[Math.floor(Math.random()*pool.length)]}; }
+function playYT(id,banda){ document.getElementById("yt").src="https://www.youtube.com/embed/"+id+"?autoplay=1"; document.getElementById("now").textContent="♪ Sonando FULL: "+banda; }
+function init(){ hand=[]; for(let i=0;i<5;i++) hand.push({...fullDeck[Math.floor(Math.random()*fullDeck.length)]}); hp=100; pts=0; selIdx=null; document.getElementById("pslot").innerHTML="TU CARTA"; document.getElementById("eslot").innerHTML="RIVAL"; document.getElementById("log").textContent="V7: YouTube Full + Fotos con proxy + Mazo Infinito"; render(); }
+function render(){ let g=document.getElementById("game"); g.innerHTML=""; hand.forEach((c,i)=>{ let d=document.createElement("div"); d.className="card"+(i===selIdx?" selected":""); d.innerHTML=`<img class="card-img" src="${c.img}" onerror="this.src='https://via.placeholder.com/150/222/ffcc00?text=${c.n}'"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`; d.onclick=()=>choose(i); g.appendChild(d); }); document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts; }
+function choose(i){ selIdx=i; let c=hand[i]; document.getElementById("pslot").innerHTML=`<div style="width:100%"><img src="${c.img}" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00">${c.b}</div><b>${c.n}</b></div>`; playYT(c.yt,c.b+" - "+c.n); render(); }
+function pelear(){ if(selIdx===null){alert("Elige carta");return} let p=hand[selIdx]; let e=fullDeck[Math.floor(Math.random()*fullDeck.length)]; document.getElementById("eslot").innerHTML=`<div style="width:100%"><img src="${e.img}" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00">${e.b}</div><b>${e.n}</b></div>`; let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow; if(p.b===e.b) ps=Math.floor(ps*1.2); let log=document.getElementById("log"); if(ps>=es){pts+=10; log.textContent="GANASTE! + Nueva carta entra"; log.style.color="#0f0";} else{hp-=15; log.textContent="PERDISTE! -15 HP + Nueva carta"; log.style.color="#f44";} hand.splice(selIdx,1); hand.push(getNew()); selIdx=null; render(); if(hp<=0){alert("GAME OVER "+pts); init();} }
 init();
 </script>
 </body>
