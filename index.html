@@ -2,35 +2,42 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ROCK CARD DUEL V7 - FULL</title>
+<title>ROCK CARD DUEL V7 - FULL AUTOPLAY FIXED</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:Arial}
 header{background:#000;border-bottom:4px solid #ffcc00;padding:10px;text-align:center;position:sticky;top:0;z-index:10}
 #yt{width:100%;max-width:640px;height:200px;border:3px solid #ffcc00;border-radius:10px;margin:10px auto;display:block}
-.card{width:155px;background:#1e1e1e;border:2px solid #444;border-radius:12px;margin:8px;display:inline-block;overflow:hidden;cursor:pointer}
+.card{width:155px;background:#1e1e1e;border:2px solid #444;border-radius:12px;margin:8px;display:inline-block;overflow:hidden;cursor:pointer;vertical-align:top}
 .card.selected{border-color:#ffcc00;box-shadow:0 0 20px #ffcc00;transform:scale(1.06)}
 .card-img{width:100%;height:120px;object-fit:cover;background:#222;display:block}
-.card-band{color:#ffcc00;font-size:.62rem;font-weight:bold;background:#000;padding:4px 6px}
-.card-name{font-weight:bold;padding:4px 6px;font-size:.85rem}
+.card-band{color:#ffcc00;font-size:.62rem;font-weight:bold;background:#000;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-name{font-weight:bold;padding:4px 6px;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-stats{display:flex;justify-content:space-between;background:#000;padding:6px;font-size:.7rem}
 .card-stats b{color:#ffcc00}
 #arena{max-width:620px;margin:10px auto;background:#111;border:2px dashed #555;border-radius:14px;padding:10px;text-align:center}
 .slot{width:165px;height:230px;background:#222;border:2px dashed #666;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin:8px;flex-direction:column;overflow:hidden}
 button{background:#ffcc00;color:#000;border:none;padding:11px 18px;border-radius:8px;font-weight:bold;cursor:pointer;margin:6px}
+button.sec{background:#222;color:#ffcc00;border:1px solid #ffcc00}
 </style>
 </head>
 <body>
 <header>
-<h1>🤘 ROCK CARD DUEL V7 - FULL MUSIC 🤘</h1>
-<div>HP:<span id="hp" style="color:#0f0">100</span> | PTS:<span id="pts">0</span> | <span id="now" style="color:#ffcc00">Toca una carta = Suena su canción completa</span></div>
-<iframe id="yt" src="https://www.youtube.com/embed/fJ9rUzIMcZQ?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<h1>🤘 ROCK CARD DUEL V7 - AUTOPLAY FULL 🤘</h1>
+<div>HP:<span id="hp" style="color:#0f0">100</span> | PTS:<span id="pts">0</span> | <span id="now" style="color:#ffcc00">Iniciando música...</span></div>
+<div id="yt"></div>
+<div>
+<button class="sec" onclick="musicPrev()">⏮ Anterior</button>
+<button class="sec" onclick="musicNext()">⏭ Siguiente</button>
+</div>
 </header>
 <div id="arena">
 <div><div class="slot" id="pslot">TU CARTA</div><div class="slot" id="eslot">RIVAL</div></div>
-<button onclick="pelear()">⚔️ PELEAR!</button><button onclick="init()">🔄 Nueva</button>
+<button onclick="pelear()">⚔️ PELEAR!</button><button onclick="init()">🔄 Nueva mano</button>
 <div id="log" style="color:#0f0;font-weight:bold;margin-top:8px"></div>
 </div>
 <div id="game" style="text-align:center"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 const fullDeck=[
 {n:"John Lennon",b:"The Beatles",yt:"A_MjCqQoLLA",atk:88,def:75,pow:92,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/8/85/John_Lennon_1969_%28cropped%29.jpg&w=300"},
@@ -46,13 +53,55 @@ const fullDeck=[
 {n:"Tony Iommi",b:"Black Sabbath",yt:"LCCiwPEdEpg",atk:93,def:85,pow:97,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/9/9f/Tony_Iommi_2009.jpg&w=300"},
 {n:"Steve Harris",b:"Iron Maiden",yt:"X4bgXH3sJ2Q",atk:87,def:90,pow:89,img:"https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/7/7b/Steve_Harris_Iron_Maiden.jpg&w=300"}
 ];
+
+let player;
+let currentMusicIdx = 0;
+let isPlayerReady = false;
+
+function onYouTubeIframeAPIReady(){
+  player = new YT.Player('yt', {
+    height: '200',
+    width: '100%',
+    videoId: fullDeck[0].yt,
+    playerVars: { 'autoplay': 1, 'controls': 1, 'enablejsapi':1, 'origin': window.location.origin },
+    events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+  });
+}
+function onPlayerReady(e){
+  isPlayerReady = true;
+  e.target.playVideo();
+  updateNowPlaying();
+}
+function onPlayerStateChange(e){
+  if(e.data === YT.PlayerState.ENDED){
+    musicNext();
+  }
+}
+function updateNowPlaying(){
+  let c = fullDeck[currentMusicIdx];
+  document.getElementById("now").textContent = "♪ AUTOPLAY FULL: " + c.b + " - " + c.n + " ["+(currentMusicIdx+1)+"/"+fullDeck.length+"] - Suena entera y cambia sola";
+}
+function playCurrentMusic(){
+  if(!isPlayerReady) return;
+  let c = fullDeck[currentMusicIdx];
+  player.loadVideoById(c.yt);
+  updateNowPlaying();
+}
+function musicNext(){
+  currentMusicIdx = (currentMusicIdx + 1) % fullDeck.length;
+  playCurrentMusic();
+}
+function musicPrev(){
+  currentMusicIdx = (currentMusicIdx - 1 + fullDeck.length) % fullDeck.length;
+  playCurrentMusic();
+}
+
 let hand=[],selIdx=null,hp=100,pts=0;
 function getNew(){ let pool=fullDeck.filter(c=>!hand.some(h=>h.n===c.n)); if(pool.length===0) pool=fullDeck; return {...pool[Math.floor(Math.random()*pool.length)]}; }
-function playYT(id,banda){ document.getElementById("yt").src="https://www.youtube.com/embed/"+id+"?autoplay=1"; document.getElementById("now").textContent="♪ Sonando FULL: "+banda; }
-function init(){ hand=[]; for(let i=0;i<5;i++) hand.push({...fullDeck[Math.floor(Math.random()*fullDeck.length)]}); hp=100; pts=0; selIdx=null; document.getElementById("pslot").innerHTML="TU CARTA"; document.getElementById("eslot").innerHTML="RIVAL"; document.getElementById("log").textContent="V7: YouTube Full + Fotos con proxy + Mazo Infinito"; render(); }
-function render(){ let g=document.getElementById("game"); g.innerHTML=""; hand.forEach((c,i)=>{ let d=document.createElement("div"); d.className="card"+(i===selIdx?" selected":""); d.innerHTML=`<img class="card-img" src="${c.img}" onerror="this.src='https://via.placeholder.com/150/222/ffcc00?text=${c.n}'"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`; d.onclick=()=>choose(i); g.appendChild(d); }); document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts; }
-function choose(i){ selIdx=i; let c=hand[i]; document.getElementById("pslot").innerHTML=`<div style="width:100%"><img src="${c.img}" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00">${c.b}</div><b>${c.n}</b></div>`; playYT(c.yt,c.b+" - "+c.n); render(); }
-function pelear(){ if(selIdx===null){alert("Elige carta");return} let p=hand[selIdx]; let e=fullDeck[Math.floor(Math.random()*fullDeck.length)]; document.getElementById("eslot").innerHTML=`<div style="width:100%"><img src="${e.img}" style="width:100%;height:120px;object-fit:cover"><div style="color:#ffcc00">${e.b}</div><b>${e.n}</b></div>`; let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow; if(p.b===e.b) ps=Math.floor(ps*1.2); let log=document.getElementById("log"); if(ps>=es){pts+=10; log.textContent="GANASTE! + Nueva carta entra"; log.style.color="#0f0";} else{hp-=15; log.textContent="PERDISTE! -15 HP + Nueva carta"; log.style.color="#f44";} hand.splice(selIdx,1); hand.push(getNew()); selIdx=null; render(); if(hp<=0){alert("GAME OVER "+pts); init();} }
+function init(){ hand=[]; for(let i=0;i<5;i++) hand.push({...fullDeck[Math.floor(Math.random()*fullDeck.length)]}); hp=100; pts=0; selIdx=null; document.getElementById("pslot").innerHTML="TU CARTA"; document.getElementById("eslot").innerHTML="RIVAL"; document.getElementById("log").textContent="V7 FIXED AUTOPLAY: Musica suena completa y cambia sola. Cartas no cambian musica."; render(); }
+function render(){ let g=document.getElementById("game"); g.innerHTML=""; hand.forEach((c,i)=>{ let d=document.createElement("div"); d.className="card"+(i===selIdx?" selected":""); d.innerHTML=`<img class="card-img" loading="eager" src="${c.img}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x120/222222/ffcc00?text=${encodeURIComponent(c.n)}';"><div class="card-band">${c.b}</div><div class="card-name">${c.n}</div><div class="card-stats"><span>ATK:<b>${c.atk}</b></span><span>DEF:<b>${c.def}</b></span><span>POW:<b>${c.pow}</b></span></div>`; d.onclick=()=>choose(i); g.appendChild(d); }); document.getElementById("hp").textContent=hp; document.getElementById("pts").textContent=pts; }
+function choose(i){ selIdx=i; let c=hand[i]; document.getElementById("pslot").innerHTML=`<div style="width:100%"><img src="${c.img}" style="width:100%;height:120px;object-fit:cover" onerror="this.src='https://via.placeholder.com/300x120/222222/ffcc00?text=${encodeURIComponent(c.n)}'"><div style="color:#ffcc00">${c.b}</div><b>${c.n}</b></div>`; document.getElementById("log").textContent="Seleccionaste: "+c.n+" | La música sigue sonando full sin cambiar"; render(); }
+function pelear(){ if(selIdx===null){alert("Elige carta");return} let p=hand[selIdx]; let e=fullDeck[Math.floor(Math.random()*fullDeck.length)]; document.getElementById("eslot").innerHTML=`<div style="width:100%"><img src="${e.img}" style="width:100%;height:120px;object-fit:cover" onerror="this.src='https://via.placeholder.com/300x120/222222/ffcc00?text=${encodeURIComponent(e.n)}'"><div style="color:#ffcc00">${e.b}</div><b>${e.n}</b></div>`; let ps=p.atk+p.def+p.pow; let es=e.atk+e.def+e.pow; if(p.b===e.b) ps=Math.floor(ps*1.2); let log=document.getElementById("log"); if(ps>=es){pts+=10; log.textContent="GANASTE! + Nueva carta | Música intacta"; log.style.color="#0f0";} else{hp-=15; log.textContent="PERDISTE! -15 HP | Música intacta"; log.style.color="#f44";} hand.splice(selIdx,1); hand.push(getNew()); selIdx=null; render(); if(hp<=0){alert("GAME OVER "+pts); init();} }
 init();
 </script>
 </body>
